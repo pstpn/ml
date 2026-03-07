@@ -41,18 +41,19 @@ def recalculate_centroids(df: pd.DataFrame) -> pd.DataFrame:
 
 class KMeansPP:
     @staticmethod
-    def clustering(df: pd.DataFrame, n_clusters: int, max_iter: int, random_state: int = 42) -> tuple[pd.DataFrame, bool]:
+    def clustering(df: pd.DataFrame, n_clusters: int, max_iter: int, random_state: int = 42) -> tuple[pd.DataFrame, pd.DataFrame, bool]:
         if n_clusters < 2:
-            return (pd.DataFrame, False)
+            return (pd.DataFrame(), pd.DataFrame(), False)
 
-        centroids_df = initialize_centroids(df, n_clusters, random_state)
+        clustered_df = df.copy()
+        centroids_df = initialize_centroids(clustered_df, n_clusters, random_state)
 
         for _ in range(max_iter):
-            new_centroids_df = recalculate_centroids(df)
+            new_centroids_df = recalculate_centroids(clustered_df)
             if centroids_df.equals(new_centroids_df):
-                return (centroids_df.rename_axis("Cluster"), True)
+                return (clustered_df, centroids_df.rename_axis("Cluster"), True)
 
             centroids_df = new_centroids_df
-            nearest_centroids(df, centroids_df)
+            nearest_centroids(clustered_df, centroids_df)
         
-        return (centroids_df.rename_axis("Cluster"), False)
+        return (clustered_df, centroids_df.rename_axis("Cluster"), False)
